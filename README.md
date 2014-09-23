@@ -36,7 +36,7 @@ options:
 ## Example
 
 ```bash
-alias jarget="java -jar jarget-0.9.10b.jar"
+alias jarget="java -jar jarget-xxx.jar"
 
 jarget search commons
 
