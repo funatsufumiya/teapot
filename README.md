@@ -9,15 +9,6 @@ Java Library Installer *using Maven Central* (like rubygems)
 - List versions of the artifacts
 - Install jar-files and the dependencies
 
-## License
-
-[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
-
-### Open Source Licenses
-
-- [Apache Commons IO 2.4](http://commons.apache.org/proper/commons-io/) (Apache License, Version 2.0)
-- [JSONIC 1.3](http://jsonic.sourceforge.jp/) (Apache License, Version 2.0)
-
 ## Downloads
 
 - [jarget-0.9.10b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.10b.jar)
@@ -84,3 +75,12 @@ jarget install commons-io commons-io 2.4 -d libs
 # Complete!
 
 ```
+
+## License
+
+[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+### Open Source Licenses
+
+- [Apache Commons IO 2.4](http://commons.apache.org/proper/commons-io/) (Apache License, Version 2.0)
+- [JSONIC 1.3](http://jsonic.sourceforge.jp/) (Apache License, Version 2.0)
