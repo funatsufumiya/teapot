@@ -18,11 +18,14 @@
 
   <!-- run -->
   <target name="run" depends="compile">
+    <mkdir dir="build"/>
     <java classpath="${local}/jsonic.jar:${lib}/commons-io.jar:." classname="JarGet" fork="true">
       <arg value="install"/>
       <arg value="com.google.inject"/>
       <arg value="guice"/>
       <arg value="3.0"/>
+      <arg value="-d"/>
+      <arg value="build"/>
     </java>
   </target>
 </project>

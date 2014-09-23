@@ -90,13 +90,15 @@ public class JarGet {
 
   public static String downloadFileAsString(String groupId, String artifact, String version, String ext){
     String id = groupId.replaceAll("\\.","/");
-    String s = download("http://search.maven.org/remotecontent?filepath="+id+"/"+artifact+"/"+version+"/"+artifact+"-"+version+"."+ext);
+    String url = "http://search.maven.org/remotecontent?filepath="+id+"/"+artifact+"/"+version+"/"+artifact+"-"+version+"."+ext;
+    String s = download(url);
     return s;
   }
 
   public static byte[] downloadFileAsBytes(String groupId, String artifact, String version, String ext){
     String id = groupId.replaceAll("\\.","/");
-    byte[] s = downloadAsBytes("http://search.maven.org/remotecontent?filepath="+id+"/"+artifact+"/"+version+"/"+artifact+"-"+version+"."+ext);
+    String url = "http://search.maven.org/remotecontent?filepath="+id+"/"+artifact+"/"+version+"/"+artifact+"-"+version+"."+ext;
+    byte[] s = downloadAsBytes(url);
     return s;
   }
 
@@ -118,6 +120,18 @@ public class JarGet {
     return null;
   }
 
+  public static void writeFile(byte[] bytes, String directory, String artifactId, String version){
+    try{
+      String path = directory.equals("") ? artifactId+"-"+version+".jar" : directory+"/"+artifactId+"-"+version+".jar";
+      FileOutputStream fos = new FileOutputStream(path);
+      fos.write(bytes);
+      fos.close();
+    }catch(IOException e){
+      e.printStackTrace();
+      System.exit(1);
+    }
+  }
+
   public static void install(String groupId, String artifact, String version){
     install(groupId, artifact, version, "");
   }
@@ -128,17 +142,29 @@ public class JarGet {
     Document xml = pom(groupId, artifact, version);
     NodeList dependencies = xpath("//project/dependencies/dependency", xml);
 
-    println("[Phase 2/4] Check Dependencies...\n");
+    println("[Phase 2/4] Check Dependencies...");
+
     for(int i=0; i<dependencies.getLength(); i++){
       Element dependency = (Element)dependencies.item(i);
       String _groupId = dependency.getElementsByTagName("groupId").item(0).getTextContent();
       String _artifactId = dependency.getElementsByTagName("artifactId").item(0).getTextContent();
       String _version = dependency.getElementsByTagName("version").item(0).getTextContent();
-      println(String.format("[Phase 3/4] Installing %s:%s (%s)...", _groupId, _artifactId, _version));
 
-      byte[] = downloadFileAsBytes(_groupId, _artifactId, _version, "jar");
+      if(_version.indexOf("$") > -1){
+        List<String> versions = versionsAsList(_groupId, _artifactId);
+        _version = versions.get(0);
+      }
       
+      println(String.format("[Phase 3/4] Installing %s:%s (%s)...", _groupId, _artifactId, _version));
+      byte[] jarBytes = downloadFileAsBytes(_groupId, _artifactId, _version, "jar");
+      writeFile(jarBytes, directory, _artifactId, _version);
     }
+
+    println(String.format("[Phase 4/4] Installing %s:%s (%s)...", groupId, artifact, version));
+    byte[] jarBytes = downloadFileAsBytes(groupId, artifact, version, "jar");
+    writeFile(jarBytes, directory, artifact, version);
+
+    println("Complete!");
   }
 
   public static void versions(String groupId, String artifact){
@@ -163,6 +189,20 @@ public class JarGet {
     if(count.compareTo(BigDecimal.ZERO) == 1){
       println("\n and more ... (rest: "+count+")");
     }
+  }
+
+  public static List<String> versionsAsList(String groupId, String artifact){
+    String s = download("http://search.maven.org/solrsearch/select?q=g:%22"+groupId+"%22+AND+a:%22"+artifact+"%22&core=gav&rows="+rowCount+"&wt=json");
+    Map<String,Object> result = JSON.decode(s);
+    Map<String,Object> response = (Map<String,Object>)result.get("response");
+    ArrayList<Map<String,Object>> docs = (ArrayList<Map<String,Object>>)response.get("docs");
+    
+    ArrayList<String> versions = new ArrayList<String>();
+    for (Map<String,Object> doc : docs) {
+      versions.add((String)doc.get("v"));
+    }
+
+    return versions;
   }
 
   public static void search(String query){
