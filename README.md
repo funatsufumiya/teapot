@@ -5,9 +5,18 @@ Java Library Installer *using Maven Central* (like rubygems)
 ## Features
 
 - Standalone
-- Search jar-file in Maven Central
+- Search jar-files in Maven Central
 - List versions of the artifacts
-- Install jar-file and the dependencies
+- Install jar-files and the dependencies
+
+## License
+
+[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+### Open Source Licenses
+
+- [Apache Commons IO 2.4](http://commons.apache.org/proper/commons-io/) (Apache License, Version 2.0)
+- [JSONIC 1.3](http://jsonic.sourceforge.jp/) (Apache License, Version 2.0)
 
 ## Downloads
 
