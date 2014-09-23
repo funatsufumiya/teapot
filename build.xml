@@ -1,6 +1,9 @@
 <project name="ivy-sample" default="run" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
   <property name="lib" value="lib" />
   <property name="local" value="local" />
+  <property name="main-class" value="JarGet" />
+  <property name="jar-name" value="jarget" />
+  <property name="version" value="0.9.10b" />
 
   <path id="lib.path.id">
     <fileset dir="${lib}"/>
@@ -14,6 +17,19 @@
   <!-- compile -->
   <target name="compile" depends="resolve">
     <javac classpath="${local}/jsonic.jar:${lib}/commons-io.jar" srcdir="${basedir}" includes="JarGet.java" destdir="${basedir}" source="1.6" target="1.6" debug="true"/>
+  </target>
+
+  <!-- jar -->
+  <target name="jar" depends="compile">
+    <delete file="${jar-name}-${version}.jar"/>
+    <jar jarfile="${jar-name}-${version}.jar">
+      <zipgroupfileset dir="${lib}" includes="**/*.jar"/>
+      <zipgroupfileset dir="${local}" includes="**/*.jar"/>
+      <fileset dir="${basedir}" includes="${main-class}.class"/>
+      <manifest>
+        <attribute name="Main-Class" value="${main-class}"/>
+      </manifest>
+    </jar>
   </target>
 
   <!-- run -->

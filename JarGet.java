@@ -58,9 +58,11 @@ public class JarGet {
   }
 
   public static void help(){
+    println("");
     println("usage: jarget [options] [args...]");
     println("");
     println("options:");
+    println("");
     println("    help");
     println("                --- show help");
     println("");
