@@ -1,0 +1,10 @@
+<ivy-module version="2.0">
+    <info organisation="" module="ivy-sample"/>
+
+    <configurations>
+      <conf name="web"/>
+    </configurations>
+    <dependencies>
+      <dependency org="commons-io" name="commons-io" rev="2.4" conf="web->default"/>
+    </dependencies>
+</ivy-module>

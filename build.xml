@@ -1,0 +1,28 @@
+<project name="ivy-sample" default="run" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+  <property name="lib" value="lib" />
+  <property name="local" value="local" />
+
+  <path id="lib.path.id">
+    <fileset dir="${lib}"/>
+  </path>
+
+  <!-- resolve -->
+  <target name="resolve">
+    <ivy:retrieve pattern="${lib}/[artifact].[ext]"/>
+  </target>
+
+  <!-- compile -->
+  <target name="compile" depends="resolve">
+    <javac classpath="${local}/jsonic.jar:${lib}/commons-io.jar" srcdir="${basedir}" includes="JarGet.java" destdir="${basedir}" source="1.6" target="1.6" debug="true"/>
+  </target>
+
+  <!-- run -->
+  <target name="run" depends="compile">
+    <java classpath="${local}/jsonic.jar:${lib}/commons-io.jar:." classname="JarGet" fork="true">
+      <arg value="install"/>
+      <arg value="com.google.inject"/>
+      <arg value="guice"/>
+      <arg value="3.0"/>
+    </java>
+  </target>
+</project>
