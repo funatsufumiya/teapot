@@ -241,7 +241,7 @@ public class JarGet {
       String value = property.getTextContent();
 
       properties.put(name,value);
-      if(root) println(String.format("    %s = %s", name, value));
+      // if(root) println(String.format("    %s = %s", name, value));
     }
     if(root) println("");
 
