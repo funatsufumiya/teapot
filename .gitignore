@@ -2,4 +2,5 @@
 /lib
 /build
 *.class
+/*.pom
 /*.jar

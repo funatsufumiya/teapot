@@ -7,16 +7,17 @@ Java Library Installer *using Maven Central* (like rubygems)
 - Standalone
 - Search jar-files in Maven Central
 - List versions of the artifacts
-- Install jar-files and the dependencies
+- Install jar-files and the dependencies *(simple or all)*
 
 ## Downloads
 
 #### Latest
 
-- [jarget-0.9.12b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.12b.jar)
+- [jarget-0.9.16b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.16b.jar)
 
 #### Archives
 
+- [jarget-0.9.12b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.12b.jar)
 - [jarget-0.9.10b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.10b.jar)
 
 ## Usage

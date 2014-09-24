@@ -3,7 +3,7 @@
   <property name="local" value="local" />
   <property name="main-class" value="JarGet" />
   <property name="jar-name" value="jarget" />
-  <property name="version" value="0.9.12b" />
+  <property name="version" value="0.9.16b" />
 
   <path id="lib.path.id">
     <fileset dir="${lib}"/>
