@@ -37,10 +37,16 @@ options:
                 --- search versions of [group-id].[artifact]
 
     install [group-id] [artifact] [version] (-d [directory])
-                --- install [version] of [group-id].[artifact]
+                --- install jars and dependencies (without test scope)
+
+    install-all [group-id] [artifact] [version] (-d [directory])
+                --- install jars and dependencies (include test scope and optional)
+
+    jar [group-id] [artifact] [version] (-d [directory])
+                --- download jar only
 
     pom [group-id] [artifact] [version] (-d [directory])
-                --- download pom-file [version] of [group-id].[artifact]
+                --- download pom
 </pre>
 
 ## Example
