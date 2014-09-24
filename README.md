@@ -11,7 +11,12 @@ Java Library Installer *using Maven Central* (like rubygems)
 
 ## Downloads
 
+### Latest
+
 - [jarget-0.9.12b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.12b.jar)
+
+### Archives
+
 - [jarget-0.9.10b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.10b.jar)
 
 ## Usage
