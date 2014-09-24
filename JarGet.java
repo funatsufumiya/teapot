@@ -24,9 +24,11 @@ public class JarGet {
   public static final String RED = "\u001b[31m";
   public static final String RESET = "\u001b[m";
 
-  public static List<String> opts = null;
+  public static Map<String,String> optionalProperties;
+  public static List<String> opts;
   public static final String SP = "--";
   public static String indent = "";
+  public static String toDirectory = "";
 
   public static int rowCount = 100;
   public static int errorCount = 0;
@@ -72,9 +74,9 @@ public class JarGet {
 
   public static void help(){
     println("");
-    println("usage: jarget [options] [args...]");
+    println("usage: jarget [command] [args...] [option...]");
     println("");
-    println("options:");
+    println("command:");
     println("");
     println("    help");
     println("                --- show help");
@@ -85,18 +87,27 @@ public class JarGet {
     println("    versions [group-id] [artifact]");
     println("                --- search versions of [group-id].[artifact]");
     println("");
-    println("    install [group-id] [artifact] [version] (-d [directory])");
+    println("    install [group-id] [artifact] [version]");
     println("                --- install jars and dependencies (without test scope)");
     println("");
-    println("    install-all [group-id] [artifact] [version] (-d [directory])");
+    println("    install-all [group-id] [artifact] [version]");
     println("                --- install jars and dependencies (include test scope and optional)");
     println("");
-    println("    jar [group-id] [artifact] [version] (-d [directory])");
+    println("    jar [group-id] [artifact] [version]");
     println("                --- install jar only");
     println("");
-    println("    pom [group-id] [artifact] [version] (-d [directory])");
+    println("    pom [group-id] [artifact] [version]");
     println("                --- download pom-file [version] of [group-id].[artifact]");
     println("");
+    println("option:");
+    println("    -Dproperty=value");
+    println("                --- define property. use this if the property is undefined");
+    println("");
+    println("    -d [directory]");
+    println("                --- set file output directory");
+    println("");
+    println("    -l [number]");
+    println("                --- set list count for display");
   }
 
   private static Document toXML(String xmlStr) {
@@ -175,7 +186,7 @@ public class JarGet {
   // DownloadPom =============================================================
 
   public static void downloadPom(String groupId, String artifact, String version){
-    downloadPom(groupId, artifact, version, "");
+    downloadPom(groupId, artifact, version, toDirectory);
   }
   public static void downloadPom(String groupId, String artifact, String version, String directory){
     println("[Phase 1/1] Downloading Pom...");
@@ -187,7 +198,7 @@ public class JarGet {
   // DownloadJar =============================================================
 
   public static void downloadJar(String groupId, String artifact, String version){
-    downloadJar(groupId, artifact, version, "");
+    downloadJar(groupId, artifact, version, toDirectory);
   }
   public static void downloadJar(String groupId, String artifact, String version, String directory){
     println("[Phase 1/1] Downloading Jar...");
@@ -199,17 +210,17 @@ public class JarGet {
   // Install =============================================================
 
   public static void installAll(String groupId, String artifact, String version){
-    install(groupId, artifact, version, "", true, true);
+    install(groupId, artifact, version, toDirectory, true, true);
   }
   public static void installAll(String groupId, String artifact, String version, String directory){
-    install(groupId, artifact, version, directory, true, true);
+    install(groupId, artifact, version, toDirectory, true, true);
   }
 
   public static void install(String groupId, String artifact, String version){
-    install(groupId, artifact, version, "", true, false);
+    install(groupId, artifact, version, toDirectory, true, false);
   }
   public static void install(String groupId, String artifact, String version, String directory){
-    install(groupId, artifact, version, directory, true, false);
+    install(groupId, artifact, version, toDirectory, true, false);
   }
 
   public static void install(String groupId, String artifact, String version, String directory, Boolean root, Boolean installAll){
@@ -233,7 +244,7 @@ public class JarGet {
     Document xml = pom(groupId, artifact, version);
 
     if(xml == null){
-      println(String.format(RED + "[Error] %s:%s (%s) was not found. skip it." + RESET, groupId, artifact, version));
+      println(String.format(RED + "[Error] %s:%s (%s) was not found" + RESET, groupId, artifact, version));
       errorCount += 1;
       return;
     }
@@ -347,6 +358,11 @@ public class JarGet {
           _version = v;
         }else if(s.equals("project.version")){
           _version = properties.get("parent.version");
+        }else if(optionalProperties.get(s) != null){
+          _version = optionalProperties.get(s);
+        }else{
+          println(RED + "[Error] parameter '"+s+"' is undefined" + RESET);
+          continue;
         }
       }
       if(_groupId.indexOf("$") > -1){
@@ -357,6 +373,11 @@ public class JarGet {
         String v = properties.get(s);
         if(v != null){
           _groupId = v;
+        }else if(optionalProperties.get(s) != null){
+          _groupId = optionalProperties.get(s);
+        }else{
+          println(RED + "[Error] parameter '"+s+"' is undefined" + RESET);
+          continue;
         }
       }
       if(_artifactId.indexOf("$") > -1){
@@ -367,6 +388,11 @@ public class JarGet {
         String v = properties.get(s);
         if(v != null){
           _artifactId = v;
+        }else if(optionalProperties.get(s) != null){
+          _artifactId = optionalProperties.get(s);
+        }else{
+          println(RED + "[Error] parameter '"+s+"' is undefined" + RESET);
+          continue;
         }
       }
 
@@ -485,34 +511,62 @@ public class JarGet {
   // Main =============================================================
 
   public static void main(String[] args) {
-    opts = Arrays.asList(args);
+    opts = new ArrayList<String>();
+    optionalProperties = new HashMap<String,String>();
+
+    int i = 0;
+    while(i < args.length) {
+      String arg = args[i];
+
+      if(arg.startsWith("-D")){
+        String s = arg.substring(2, arg.length());
+        int pos = s.indexOf("=");
+        String param = s.substring(0,pos);
+        String value = s.substring(pos+1, s.length());
+        optionalProperties.put(param,value);
+      }else if(arg.equals("-d")){
+        if(i == args.length - 1){
+          help();
+          System.exit(1);
+        }else{
+          toDirectory = args[i+1];
+          i++;
+        }
+      }else if(arg.equals("-l")){
+        if(i == args.length - 1){
+          help();
+          System.exit(1);
+        }else{
+          rowCount = Integer.parseInt(args[i+1]);
+          i++;
+        }
+      }else{
+        opts.add(arg);
+      }
+
+      i++;
+    }
 
     if(opts.size() == 0 || opts.get(0).equals("help")){
       help();
+
     }else if(opts.size() == 2 && opts.get(0).equals("search")){
       search(opts.get(1));
+
     }else if(opts.size() == 3 && opts.get(0).equals("versions")){
       versions(opts.get(1), opts.get(2));
 
     }else if(opts.size() == 4 && opts.get(0).equals("install")){
       install(opts.get(1), opts.get(2), opts.get(3));
-    }else if(opts.size() == 6 && opts.get(0).equals("install") && opts.get(4).equals("-d")){
-      install(opts.get(1), opts.get(2), opts.get(3), opts.get(5));
 
     }else if(opts.size() == 4 && opts.get(0).equals("install-all")){
       installAll(opts.get(1), opts.get(2), opts.get(3));
-    }else if(opts.size() == 6 && opts.get(0).equals("install-all") && opts.get(4).equals("-d")){
-      installAll(opts.get(1), opts.get(2), opts.get(3), opts.get(5));
 
     }else if(opts.size() == 4 && opts.get(0).equals("pom")){
       downloadPom(opts.get(1), opts.get(2), opts.get(3));
-    }else if(opts.size() == 6 && opts.get(0).equals("pom") && opts.get(4).equals("-d")){
-      downloadPom(opts.get(1), opts.get(2), opts.get(3), opts.get(5));
 
     }else if(opts.size() == 4 && opts.get(0).equals("jar")){
       downloadJar(opts.get(1), opts.get(2), opts.get(3));
-    }else if(opts.size() == 6 && opts.get(0).equals("jar") && opts.get(4).equals("-d")){
-      downloadJar(opts.get(1), opts.get(2), opts.get(3), opts.get(5));
 
     }else{
       help();
