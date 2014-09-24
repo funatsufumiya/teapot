@@ -100,6 +100,7 @@ public class JarGet {
     println("                --- download pom-file [version] of [group-id].[artifact]");
     println("");
     println("option:");
+    println("");
     println("    -Dproperty=value");
     println("                --- define property. use this if the property is undefined");
     println("");

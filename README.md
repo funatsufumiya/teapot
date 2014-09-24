@@ -25,9 +25,9 @@ Java Library Installer *using Maven Central* (like rubygems)
 ## Usage
 
 <pre>
-usage: jarget [options] [args...]
+usage: jarget [command] [args...] [option...]
 
-options:
+command:
 
     help
                 --- show help
@@ -38,17 +38,28 @@ options:
     versions [group-id] [artifact]
                 --- search versions of [group-id].[artifact]
 
-    install [group-id] [artifact] [version] (-d [directory])
+    install [group-id] [artifact] [version]
                 --- install jars and dependencies (without test scope)
 
-    install-all [group-id] [artifact] [version] (-d [directory])
+    install-all [group-id] [artifact] [version]
                 --- install jars and dependencies (include test scope and optional)
 
-    jar [group-id] [artifact] [version] (-d [directory])
-                --- download jar only
+    jar [group-id] [artifact] [version]
+                --- install jar only
 
-    pom [group-id] [artifact] [version] (-d [directory])
-                --- download pom
+    pom [group-id] [artifact] [version]
+                --- download pom-file [version] of [group-id].[artifact]
+
+option:
+
+    -Dproperty=value
+                --- define property. use this if the property is undefined
+
+    -d [directory]
+                --- set file output directory
+
+    -l [number]
+                --- set list count for display
 </pre>
 
 ## Example
@@ -93,6 +104,18 @@ jarget install commons-io commons-io 2.4 -d libs
 # Complete!
 
 ```
+
+## FAQ
+
+#### [Error] parameter 'xxx' is undefined
+
+On current version, we recognize parametes only defined in `<parameters>...</parameters>`.
+
+Please use **-D**parameter**=**value option.
+
+#### Can't read version like `[1.7.0, 1.8.0)`
+
+Sorry. We are trying to support this.
 
 ## License
 
