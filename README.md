@@ -13,10 +13,11 @@ Java Library Installer *using Maven Central* (like rubygems)
 
 #### Latest
 
-- [jarget-0.9.18b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.18b.jar)
+- [jarget-0.9.22b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.22b.jar)
 
 #### Archives
 
+- [jarget-0.9.18b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.18b.jar)
 - [jarget-0.9.16b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.16b.jar)
 - [jarget-0.9.12b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.12b.jar)
 - [jarget-0.9.10b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.10b.jar)
@@ -87,7 +88,7 @@ jarget install commons-io commons-io 2.4 -d libs
 
 # [Phase 1/4] Downloading Pom...
 # [Phase 2/4] Check Dependencies...
-# [Phase 3/4] Installing junit:junit (4.10)...
+# [Phase 3/4] Installing Dependencies... OK
 # [Phase 4/4] Installing commons-io:commons-io (2.4)...
 # Complete!
 
