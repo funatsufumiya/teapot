@@ -22,6 +22,9 @@ import net.arnx.jsonic.JSON;
 public class JarGet {
 
   public static List<String> opts = null;
+  public static final String SP = "--";
+  public static String indent = "";
+
   public static int rowCount = 100;
   public static int errorCount = 0;
   public static List<String> downloadList = new ArrayList<String>();
@@ -208,15 +211,19 @@ public class JarGet {
 
   public static void install(String groupId, String artifact, String version, String directory, Boolean root, Boolean installAll){
     
-    // Install Start ===============================
+    // =====================
+    // Install Start
+    // =====================
 
     if(root){
       println(String.format("\nInstalling %s:%s (%s)...\n", groupId, artifact, version));
     }else{
-      println(String.format("    Installing %s:%s (%s)...", groupId, artifact, version));
+      println(String.format(indent + " " + "Installing %s:%s (%s)...", groupId, artifact, version));
     }
 
-    // Download Pom ===============================
+    // =====================
+    // Download Pom
+    // =====================
 
     if(root) println("[Phase 1/4] Downloading Pom...");
 
@@ -228,10 +235,11 @@ public class JarGet {
       return;
     }
 
+    // =====================
+    // Read Properties
+    // =====================
 
-    // Read Properties ===============================
-
-    if(root) println("[Phase 2/4] Reading Properties...\n");
+    if(root) println("[Phase 2/4] Reading Properties...");
 
     Map<String,String> properties = new HashMap<String,String>();
     NodeList propertiesXML = xpath("//project/properties/*", xml);
@@ -243,11 +251,12 @@ public class JarGet {
       properties.put(name,value);
       // if(root) println(String.format("    %s = %s", name, value));
     }
-    if(root) println("");
 
-    // Install Dependencies ===============================
+    // =====================
+    // Install Dependencies
+    // =====================
 
-    if(root) println("[Phase 3/4] Installing Dependencies...\n");
+    if(root) println("[Phase 3/4] Installing Dependencies...");
 
     NodeList dependencies = xpath("//project/dependencies/dependency", xml);
 
@@ -271,6 +280,10 @@ public class JarGet {
       properties.put("project.artifactId", properties.get("pom.artifactId"));
     }catch(Exception e){}
 
+    // ================================================
+    // Install Dependencies
+    // ================================================
+
     for(int i=0; i<dependencies.getLength(); i++){
       Element dependency = (Element)dependencies.item(i);
 
@@ -279,9 +292,17 @@ public class JarGet {
       NodeList _versionElement = dependency.getElementsByTagName("version");
 
       // Skip test and optional
+
+      NodeList optionalElement = dependency.getElementsByTagName("optional");
+      NodeList scopeElement = dependency.getElementsByTagName("scope");
+
       if(!installAll){
-        NodeList optionalElement = dependency.getElementsByTagName("optional");
-        NodeList scopeElement = dependency.getElementsByTagName("scope");
+        if(scopeElement.getLength() > 0){
+          String scope = scopeElement.item(0).getTextContent();
+          if(scope.equals("test")){
+            continue; // skip
+          }
+        }
 
         if(optionalElement.getLength() > 0){
           String optional = optionalElement.item(0).getTextContent();
@@ -289,35 +310,26 @@ public class JarGet {
             continue; // optional then skip
           }
         }
-
-        if(scopeElement.getLength() > 0){
-          String scope = scopeElement.item(0).getTextContent();
-          if(scope.equals("test")){
-            continue; // skip
-          }
-        }
       }
 
-      String _groupId = null;
-      String _artifactId = null;
+      String _groupId = _groupIdElement.item(0).getTextContent();
+      String _artifactId =  _artifactIdElement.item(0).getTextContent();
       String _version = null;
 
-      // Set Identifiers
+      // Set Version
 
       if(_versionElement.getLength() > 0){
         _version = _versionElement.item(0).getTextContent();
       }else{
-        _version = properties.get("parent.version");
+        // Set Latest Version
+        List<String> allVersions = versionsAsList(_groupId, _artifactId);
+        _version = allVersions.get(0);
       }
-      if(_groupIdElement.getLength() > 0){
-        _groupId = _groupIdElement.item(0).getTextContent();
-      }else{
-        _groupId = properties.get("parent.groupId");
-      }
-      if(_artifactIdElement.getLength() > 0){
-        _artifactId = _artifactIdElement.item(0).getTextContent();
-      }else{
-        _artifactId = properties.get("parent.artifactId");
+
+      // WORKAROUND
+
+      if(_groupId.equals("xerces") && _artifactId.equals("xerces-impl")){
+        _artifactId = "xercesImpl";
       }
 
       // Set Properties
@@ -333,37 +345,46 @@ public class JarGet {
         }
       }
       if(_groupId.indexOf("$") > -1){
-        final Pattern p = Pattern.compile("^[$][{](.*)[}]$");
-        Matcher m = p.matcher(_groupId);
-        if(m.find()){
-          String v = properties.get(m.group(1));
-          if(v != null){
-            _groupId = v;
-          }
+        String s = _groupId;
+        s = s.replaceAll("\\$","");
+        s = s.replaceAll("\\{","");
+        s = s.replaceAll("\\}","");
+        String v = properties.get(s);
+        if(v != null){
+          _groupId = v;
         }
       }
       if(_artifactId.indexOf("$") > -1){
-        final Pattern p = Pattern.compile("^[$][{](.*)[}]$");
-        Matcher m = p.matcher(_artifactId);
-        if(m.find()){
-          String v = properties.get(m.group(1));
-          if(v != null){
-            _artifactId = v;
-          }
+        String s = _artifactId;
+        s = s.replaceAll("\\$","");
+        s = s.replaceAll("\\{","");
+        s = s.replaceAll("\\}","");
+        String v = properties.get(s);
+        if(v != null){
+          _artifactId = v;
         }
       }
 
       // Install Dependency Recursively
       
       if(!isDownloaded(_groupId, _artifactId, _version, "jar")){
+        String oldIndent = indent;
+        indent += SP;
         install(_groupId, _artifactId, _version, directory, false, installAll);
+        indent = oldIndent;
         addDownloadList(_groupId, _artifactId, _version, "jar");
       }
     }
 
+    // ============================================
+    // End of Install Dependencies
+    // =============================================
+
     if(root) println("");
 
-    // Install Jar ===============================
+    // =====================
+    // Install Jar
+    // =====================
 
     if(root) println(String.format("[Phase 4/4] Installing %s:%s (%s)...", groupId, artifact, version));
     
@@ -377,8 +398,8 @@ public class JarGet {
       if(errorCount == 0){
         println("\nComplete!");
       }else{
-        println("===============================================");
-        println("\nInstall failed ("+errorCount+" errors occured)");
+        println("\n===============================================");
+        println("Install failed ("+errorCount+" errors occured)");
         println("===============================================");
       }
     }
@@ -462,7 +483,7 @@ public class JarGet {
 
   public static void main(String[] args) {
     opts = Arrays.asList(args);
-    
+
     if(opts.size() == 0 || opts.get(0).equals("help")){
       help();
     }else if(opts.size() == 2 && opts.get(0).equals("search")){
