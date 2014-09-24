@@ -1,16 +1,23 @@
 import java.util.*;
+import java.util.regex.*;
+
 import java.io.*;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.*;
 import java.nio.channels.*;
-import net.arnx.jsonic.JSON;
+
+import java.net.URL;
+import java.net.URLEncoder;
+
 import java.math.BigDecimal;
-import org.apache.commons.io.IOUtils;
-import org.w3c.dom.*;
+
 import javax.xml.parsers.*;
 import javax.xml.xpath.*;
+
 import org.xml.sax.InputSource;
+import org.apache.commons.io.IOUtils;
+import org.w3c.dom.*;
+
+import net.arnx.jsonic.JSON;
 
 public class JarGet {
 
@@ -75,6 +82,9 @@ public class JarGet {
     println("    install [group-id] [artifact] [version] (-d [directory])");
     println("                --- install [version] of [group-id].[artifact]");
     println("");
+    println("    pom [group-id] [artifact] [version] (-d [directory])");
+    println("                --- download pom-file [version] of [group-id].[artifact]");
+    println("");
   }
 
   private static Document toXML(String xmlStr) {
@@ -122,9 +132,9 @@ public class JarGet {
     return null;
   }
 
-  public static void writeFile(byte[] bytes, String directory, String artifactId, String version){
+  public static void writeFile(byte[] bytes, String directory, String artifactId, String version, String ext){
     try{
-      String path = directory.equals("") ? artifactId+"-"+version+".jar" : directory+"/"+artifactId+"-"+version+".jar";
+      String path = directory.equals("") ? artifactId+"-"+version+"."+ext : directory+"/"+artifactId+"-"+version+"."+ext;
       FileOutputStream fos = new FileOutputStream(path);
       fos.write(bytes);
       fos.close();
@@ -134,17 +144,44 @@ public class JarGet {
     }
   }
 
+  public static void downloadPom(String groupId, String artifact, String version){
+    downloadPom(groupId, artifact, version, "");
+  }
+
+  public static void downloadPom(String groupId, String artifact, String version, String directory){
+    println("[Phase 1/1] Downloading Pom...");
+    byte[] jarBytes = downloadFileAsBytes(groupId, artifact, version, "pom");
+    writeFile(jarBytes, directory, artifact, version, "pom");
+    println("\nComplete!");
+  }
+
   public static void install(String groupId, String artifact, String version){
     install(groupId, artifact, version, "");
   }
 
   public static void install(String groupId, String artifact, String version, String directory){
     println(String.format("\nInstalling %s:%s (%s)...\n", groupId, artifact, version));
-    println("[Phase 1/4] Downloading Pom...");
-    Document xml = pom(groupId, artifact, version);
-    NodeList dependencies = xpath("//project/dependencies/dependency", xml);
 
-    println("[Phase 2/4] Check Dependencies...");
+    println("[Phase 1/5] Downloading Pom...");
+    Document xml = pom(groupId, artifact, version);
+
+    println("[Phase 2/5] Reading Properties...\n");
+
+    Map<String,String> properties = new HashMap<String,String>();
+    NodeList propertiesXML = xpath("//project/properties/*", xml);
+    for(int i=0; i<propertiesXML.getLength(); i++){
+      Element property = (Element)propertiesXML.item(i);
+      String name = property.getTagName();
+      String value = property.getTextContent();
+
+      properties.put(name,value);
+      println(String.format("    %s = %s", name, value));
+    }
+    println("");
+
+    println("[Phase 3/5] Check Dependencies...");
+
+    NodeList dependencies = xpath("//project/dependencies/dependency", xml);
 
     for(int i=0; i<dependencies.getLength(); i++){
       Element dependency = (Element)dependencies.item(i);
@@ -153,20 +190,26 @@ public class JarGet {
       String _version = dependency.getElementsByTagName("version").item(0).getTextContent();
 
       if(_version.indexOf("$") > -1){
-        List<String> versions = versionsAsList(_groupId, _artifactId);
-        _version = versions.get(0);
+        final Pattern p = Pattern.compile("^[$][{](.*)[}]$");
+        Matcher m = p.matcher(_version);
+        if(m.find()){
+          String v = properties.get(m.group(1));
+          if(v != null){
+            _version = v;
+          }
+        }
       }
       
-      println(String.format("[Phase 3/4] Installing %s:%s (%s)...", _groupId, _artifactId, _version));
+      println(String.format("[Phase 4/5] Installing %s:%s (%s)...", _groupId, _artifactId, _version));
       byte[] jarBytes = downloadFileAsBytes(_groupId, _artifactId, _version, "jar");
-      writeFile(jarBytes, directory, _artifactId, _version);
+      writeFile(jarBytes, directory, _artifactId, _version, "jar");
     }
 
-    println(String.format("[Phase 4/4] Installing %s:%s (%s)...", groupId, artifact, version));
+    println(String.format("[Phase 5/5] Installing %s:%s (%s)...", groupId, artifact, version));
     byte[] jarBytes = downloadFileAsBytes(groupId, artifact, version, "jar");
-    writeFile(jarBytes, directory, artifact, version);
+    writeFile(jarBytes, directory, artifact, version, "jar");
 
-    println("Complete!");
+    println("\nComplete!");
   }
 
   public static void versions(String groupId, String artifact){
@@ -249,6 +292,10 @@ public class JarGet {
       install(opts.get(1), opts.get(2), opts.get(3));
     }else if(opts.size() == 6 && opts.get(0).equals("install") && opts.get(4).equals("-d")){
       install(opts.get(1), opts.get(2), opts.get(3), opts.get(5));
+    }else if(opts.size() == 4 && opts.get(0).equals("pom")){
+      downloadPom(opts.get(1), opts.get(2), opts.get(3));
+    }else if(opts.size() == 6 && opts.get(0).equals("pom") && opts.get(4).equals("-d")){
+      downloadPom(opts.get(1), opts.get(2), opts.get(3), opts.get(5));
     }else{
       help();
     }
