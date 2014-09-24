@@ -21,6 +21,9 @@ import net.arnx.jsonic.JSON;
 
 public class JarGet {
 
+  public static final String RED = "\u001b[31m";
+  public static final String RESET = "\u001b[m";
+
   public static List<String> opts = null;
   public static final String SP = "--";
   public static String indent = "";
@@ -230,7 +233,7 @@ public class JarGet {
     Document xml = pom(groupId, artifact, version);
 
     if(xml == null){
-      println(String.format("[Error] %s:%s (%s) was not found. skip it.", groupId, artifact, version));
+      println(String.format(RED + "[Error] %s:%s (%s) was not found. skip it." + RESET, groupId, artifact, version));
       errorCount += 1;
       return;
     }
@@ -335,13 +338,15 @@ public class JarGet {
       // Set Properties
 
       if(_version.indexOf("$") > -1){
-        final Pattern p = Pattern.compile("^[$][{](.*)[}]$");
-        Matcher m = p.matcher(_version);
-        if(m.find()){
-          String v = properties.get(m.group(1));
-          if(v != null){
-            _version = v;
-          }
+        String s = _version;
+        s = s.replaceAll("\\$","");
+        s = s.replaceAll("\\{","");
+        s = s.replaceAll("\\}","");
+        String v = properties.get(s);
+        if(v != null){
+          _version = v;
+        }else if(s.equals("project.version")){
+          _version = properties.get("parent.version");
         }
       }
       if(_groupId.indexOf("$") > -1){
@@ -398,9 +403,7 @@ public class JarGet {
       if(errorCount == 0){
         println("\nComplete!");
       }else{
-        println("\n===============================================");
-        println("Install failed ("+errorCount+" errors occured)");
-        println("===============================================");
+        println("\n"+RED+"Install failed ("+errorCount+" errors occured)"+RESET);
       }
     }
   }
