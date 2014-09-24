@@ -112,7 +112,7 @@ jarget install commons-io commons-io 2.4 -d libs
 
 On current version, we recognize parametes only defined in `<parameters>...</parameters>`.
 
-Please use **-D**parameter**=**value option.
+Please use `-Dparameter=value` option.
 
 #### Can't read version like `[1.7.0, 1.8.0)`
 
