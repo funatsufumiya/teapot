@@ -80,7 +80,7 @@ teapot search commons
 # commons (org.apache.commons)
 # ...
 
-jarget versions commons-io commons-io
+teapot versions commons-io commons-io
 
 # Versions:
 
@@ -95,7 +95,7 @@ jarget versions commons-io commons-io
 # 1.3.1
 # ...
 
-jarget install commons-io commons-io 2.4 -d libs
+teapot install commons-io commons-io 2.4 -d libs
 
 # Installing commons-io:commons-io (2.4)...
 
