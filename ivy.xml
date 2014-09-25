@@ -7,5 +7,6 @@
     <dependencies>
       <dependency org="commons-io" name="commons-io" rev="2.4" conf="web->default"/>
       <dependency org="org.codehaus.groovy" name="groovy-ant" rev="2.3.6" conf="web->default"/>
+      <dependency org="org.javatuples" name="javatuples" rev="1.2" conf="web->default"/>
     </dependencies>
 </ivy-module>

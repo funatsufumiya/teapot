@@ -13,10 +13,11 @@ Java Library Installer *using Maven Central* (like rubygems)
 
 #### Latest
 
-- [teapot-0.10.3b.jar](http://atmarksharp.github.io/jarget/teapot-0.10.3b.jar)
+- [teapot-0.11.10b.jar](http://atmarksharp.github.io/jarget/teapot-0.11.10b.jar)
 
 #### Archives
 
+- [teapot-0.10.3b.jar](http://atmarksharp.github.io/jarget/teapot-0.10.3b.jar)
 - [teapot-0.10.2b.jar](http://atmarksharp.github.io/jarget/teapot-0.10.2b.jar)
 
 ## Usage
@@ -116,9 +117,11 @@ On current version, teapot recognizes parametes only defined in `<parameters>...
 
 Please use `-Dparameter=value` option.
 
-#### Can't read version like `[1.7.0, 1.8.0)`
+#### Can't read version like `[1.7.0,), (,1.8.0]`
 
-Sorry. We are trying to support this.
+Sorry. We will not support complicated version range.
+
+Please use simple range like `[1.7.0,1.8.0]`
 
 ## License
 

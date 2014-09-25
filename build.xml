@@ -4,7 +4,7 @@
   <property name="gen" value="gen" />
   <property name="main-class" value="Teapot" />
   <property name="jar-name" value="teapot" />
-  <property name="version" value="0.10.3b" />
+  <property name="version" value="0.11.10b" />
 
   <path id="lib.path.id">
     <fileset dir="${lib}"/>
@@ -39,14 +39,14 @@
 
   <!-- compile -->
   <target name="compile" depends="resolve,insert-version">
-    <javac classpath="${local}/jsonic.jar:${lib}/commons-io.jar" srcdir="${gen}" destdir="${basedir}" includes="${main-class}.java" source="1.6" target="1.6" debug="true"/>
+    <javac classpath="${local}/jsonic.jar:${lib}/commons-io.jar:${lib}/javatuples.jar" srcdir="${gen}" destdir="${basedir}" includes="${main-class}.java" source="1.6" target="1.6" debug="true"/>
   </target>
 
   <!-- jar -->
   <target name="jar" depends="compile">
     <delete file="${jar-name}-${version}.jar"/>
     <jar jarfile="${jar-name}-${version}.jar">
-      <zipgroupfileset dir="${lib}" includes="**/*.jar"/>
+      <zipgroupfileset dir="${lib}" includes="jsonic.jar,commons-io.jar,javatuples.jar"/>
       <zipgroupfileset dir="${local}" includes="**/*.jar"/>
       <fileset dir="${basedir}" includes="${main-class}.class"/>
       <manifest>
@@ -58,7 +58,7 @@
   <!-- run -->
   <target name="run" depends="compile">
     <mkdir dir="build"/>
-    <java classpath="${local}/jsonic.jar:${lib}/commons-io.jar:." classname="${main-class}" fork="true">
+    <java classpath="${local}/jsonic.jar:${lib}/commons-io.jar:${lib}/javatuples.jar:." classname="${main-class}" fork="true">
       <arg value="install"/>
       <arg value="com.google.inject"/>
       <arg value="guice"/>

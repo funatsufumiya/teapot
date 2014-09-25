@@ -16,6 +16,7 @@ import javax.xml.xpath.*;
 import org.xml.sax.InputSource;
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.*;
+import org.javatuples.Pair;
 
 import net.arnx.jsonic.JSON;
 
@@ -196,6 +197,130 @@ public class Teapot {
     }
   }
 
+  /*
+    @return status, versions
+  */
+  public static Pair<String,List<String>> parseVersionRange(String groupId, String artifactId, String version){
+    String leftFlag = null;
+    String rightFlag = null;
+    String leftValue = null;
+    String rightValue = null;
+
+    StringBuffer sb = new StringBuffer();
+
+    boolean start = true;
+    boolean left = false;
+    boolean right = false;
+
+    String line = version;
+
+    // Parse Range ==================================
+
+    for(int i=0; i<line.length(); i++) {
+      String s = line.substring(i,i+1);
+
+      if(start){
+        if(s.equals("(")){
+          leftFlag = "gt";
+        }else if(s.equals("[")){
+          leftFlag = "gte";
+        }else{
+          println(String.format(RED+"[Parse Error] (column:%d) '%s' is not expected"+RESET, i, s));
+          return null;
+        }
+        start = false;
+        left = true;
+      }else if(left){
+        if(s.equals(",")){
+          leftValue = sb.toString();
+          sb = new StringBuffer();
+          left = false;
+          right = true;
+        }else if(s.equals("(") || s.equals("[") || s.equals(")") || s.equals("]")){
+          println(String.format(RED+"[Parse Error] (column:%d) '%s' is not expected"+RESET, i, s));
+          return null;
+        }else{
+          sb.append(s);
+        }
+      }else if(right){
+        if(s.equals(")")){
+          rightValue = sb.toString();
+          rightFlag = "lt";
+          break;
+        }else if(s.equals("]")){
+          rightValue = sb.toString();
+          rightFlag = "lte";
+          break;
+        }else if(s.equals("(") || s.equals("[") || s.equals(",")){
+          println(String.format(RED+"[Parse Error] (column:%d) '%s' is not expected"+RESET, i, s));
+          return null;
+        }else{
+          sb.append(s);
+        }
+      }
+    }
+
+    // Get Versions =============================
+
+    List<String> versions = versionsAsList(groupId, artifactId);
+    Collections.reverse(versions); // reverse!
+
+    if(!leftValue.equals("")){
+      if(leftFlag.equals("gte")){
+        int n = versions.indexOf(leftValue);
+        versions.subList(0,n).clear();
+      }else if(leftFlag.equals("gt")){
+        int n = versions.indexOf(leftValue);
+        versions.subList(0,n+1).clear();
+      }
+    }
+
+    Collections.reverse(versions);
+
+    if(!rightValue.equals("")){
+      if(rightFlag.equals("lte")){
+        int n = versions.indexOf(rightValue);
+        versions.subList(0,n).clear();
+      }else if(rightFlag.equals("lt")){
+        int n = versions.indexOf(rightValue);
+        versions.subList(0,n+1).clear();
+      }
+    }
+
+    String status = null;
+    if(leftValue.equals("")){
+      status = "lt";
+    }else if(rightValue.equals("")){
+      status = "gt";
+    }else{
+      status = "range";
+    }
+
+    Pair<String,List<String>> tuple = Pair.with(status, versions); 
+    return tuple;
+  }
+
+  /** Parse version like "(1.2, 3.4]" */
+  public static String detectVersion(String groupId, String artifactId, String version){
+    Pair<String,List<String>> tuple = parseVersionRange(groupId, artifactId, version);
+
+    if(tuple == null) return null;
+
+    String status = tuple.getValue0();
+    List<String> versions = tuple.getValue1();
+
+    String ret = null;
+    if(status.equals("lt")){
+      ret = versions.get(0);
+    }else if(status.equals("gt")){
+      ret = versions.get(versions.size()-1);
+    }else{
+      ret = versions.get(0);
+    }
+
+    return ret;
+  }
+
   // DownloadPom =============================================================
 
   public static void downloadPom(String groupId, String artifact, String version){
@@ -326,7 +451,7 @@ public class Teapot {
       if(!installAll){
         if(scopeElement.getLength() > 0){
           String scope = scopeElement.item(0).getTextContent();
-          if(scope.equals("test")){
+          if(scope.equals("test") || scope.equals("provided")){
             continue; // skip
           }
         }
@@ -360,24 +485,6 @@ public class Teapot {
       }
 
       // Set Properties
-
-      if(_version.indexOf("$") > -1){
-        String s = _version;
-        s = s.replaceAll("\\$","");
-        s = s.replaceAll("\\{","");
-        s = s.replaceAll("\\}","");
-        String v = properties.get(s);
-        if(v != null){
-          _version = v;
-        }else if(s.equals("project.version")){
-          _version = properties.get("parent.version");
-        }else if(optionalProperties.get(s) != null){
-          _version = optionalProperties.get(s);
-        }else{
-          println(RED + "[Error] parameter '"+s+"' is undefined" + RESET);
-          continue;
-        }
-      }
       if(_groupId.indexOf("$") > -1){
         String s = _groupId;
         s = s.replaceAll("\\$","");
@@ -408,15 +515,48 @@ public class Teapot {
           continue;
         }
       }
+      if(_version.indexOf("$") > -1){
+        String s = _version;
+        s = s.replaceAll("\\$","");
+        s = s.replaceAll("\\{","");
+        s = s.replaceAll("\\}","");
+        String v = properties.get(s);
+        if(v != null){
+          _version = v;
+        }else if(s.equals("project.version")){
+          _version = properties.get("parent.version");
+        }else if(optionalProperties.get(s) != null){
+          _version = optionalProperties.get(s);
+        }else{
+          println(RED + "[Error] parameter '"+s+"' is undefined" + RESET);
+          continue;
+        }
+      }
+
+      String versionRange = null;
+
+      // Detect version of Range
+      if(_version.startsWith("[") || _version.startsWith("(")){
+        versionRange = _version;
+        _version = detectVersion(_groupId, _artifactId, _version);
+        if(_version == null){
+          continue;
+        }
+      }
+
+      // Treat wild card
+      if(_version.indexOf("*") > -1){
+        List<String> allVersions = versionsAsList(_groupId, _artifactId);
+        _version = allVersions.get(0);
+      }
 
       // Install Dependency Recursively
-      
       if(!isDownloaded(_groupId, _artifactId, _version, "jar")){
         String oldIndent = indent;
         indent += SP;
+        addDownloadList(_groupId, _artifactId, _version, "jar");
         install(_groupId, _artifactId, _version, directory, false, installAll);
         indent = oldIndent;
-        addDownloadList(_groupId, _artifactId, _version, "jar");
       }
     }
 
@@ -432,11 +572,8 @@ public class Teapot {
 
     if(root) println(String.format("[Phase 4/4] Installing %s:%s (%s)...", groupId, artifact, version));
     
-    if(!isDownloaded(groupId, artifact, version, "jar")){
-      byte[] jarBytes = downloadFileAsBytes(groupId, artifact, version, "jar");
-      writeFile(jarBytes, directory, artifact, version, "jar");
-      addDownloadList(groupId, artifact, version, "jar");
-    }
+    byte[] jarBytes = downloadFileAsBytes(groupId, artifact, version, "jar");
+    writeFile(jarBytes, directory, artifact, version, "jar");
 
     if(root){
       if(errorCount == 0){
