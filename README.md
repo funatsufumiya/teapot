@@ -1,4 +1,4 @@
-# JarGet
+# Teapot
 
 Java Library Installer *using Maven Central* (like rubygems)
 
@@ -13,10 +13,11 @@ Java Library Installer *using Maven Central* (like rubygems)
 
 #### Latest
 
-- [jarget-0.10.1b.jar](http://atmarksharp.github.io/jarget/jarget-0.10.1b.jar)
+- [teapot-0.10.2b.jar](http://atmarksharp.github.io/jarget/teapot-0.10.2b.jar)
 
 #### Archives
 
+- [jarget-0.10.1b.jar](http://atmarksharp.github.io/jarget/jarget-0.10.1b.jar)
 - [jarget-0.9.22b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.22b.jar)
 - [jarget-0.9.18b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.18b.jar)
 - [jarget-0.9.16b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.16b.jar)
@@ -26,7 +27,7 @@ Java Library Installer *using Maven Central* (like rubygems)
 ## Usage
 
 <pre>
-usage: jarget [command] [args...] [option...]
+usage: teapot [command] [args...] [option...]
 
 command:
 
@@ -66,9 +67,9 @@ option:
 ## Example
 
 ```bash
-alias jarget="java -jar jarget-xxx.jar"
+alias teapot="java -jar teapot-xxx.jar"
 
-jarget search commons
+teapot search commons
 
 # Search Results:
 

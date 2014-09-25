@@ -19,7 +19,7 @@ import org.w3c.dom.*;
 
 import net.arnx.jsonic.JSON;
 
-public class JarGet {
+public class Teapot {
 
   public static final String RED = "\u001b[31m";
   public static final String RESET = "\u001b[m";
@@ -74,7 +74,7 @@ public class JarGet {
 
   public static void help(){
     println("");
-    println("usage: jarget [command] [args...] [option...]");
+    println("usage: teapot [command] [args...] [option...]");
     println("");
     println("command:");
     println("");

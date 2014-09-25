@@ -1,9 +1,9 @@
 <project name="ivy-sample" default="run" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
   <property name="lib" value="lib" />
   <property name="local" value="local" />
-  <property name="main-class" value="JarGet" />
-  <property name="jar-name" value="jarget" />
-  <property name="version" value="0.10.1b" />
+  <property name="main-class" value="Teapot" />
+  <property name="jar-name" value="teapot" />
+  <property name="version" value="0.10.2b" />
 
   <path id="lib.path.id">
     <fileset dir="${lib}"/>
@@ -16,7 +16,7 @@
 
   <!-- compile -->
   <target name="compile" depends="resolve">
-    <javac classpath="${local}/jsonic.jar:${lib}/commons-io.jar" srcdir="${basedir}" includes="JarGet.java" destdir="${basedir}" source="1.6" target="1.6" debug="true"/>
+    <javac classpath="${local}/jsonic.jar:${lib}/commons-io.jar" srcdir="${basedir}" includes="${main-class}.java" destdir="${basedir}" source="1.6" target="1.6" debug="true"/>
   </target>
 
   <!-- jar -->
@@ -35,7 +35,7 @@
   <!-- run -->
   <target name="run" depends="compile">
     <mkdir dir="build"/>
-    <java classpath="${local}/jsonic.jar:${lib}/commons-io.jar:." classname="JarGet" fork="true">
+    <java classpath="${local}/jsonic.jar:${lib}/commons-io.jar:." classname="${main-class}" fork="true">
       <arg value="install"/>
       <arg value="com.google.inject"/>
       <arg value="guice"/>
