@@ -112,7 +112,7 @@ teapot install commons-io commons-io 2.4 -d libs
 
 #### [Error] parameter 'xxx' is undefined
 
-On current version, we recognize parametes only defined in `<parameters>...</parameters>`.
+On current version, teapot recognizes parametes only defined in `<parameters>...</parameters>`.
 
 Please use `-Dparameter=value` option.
 
