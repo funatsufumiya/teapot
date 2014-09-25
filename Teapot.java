@@ -116,6 +116,9 @@ public class Teapot {
     println("    -Dproperty=value");
     println("                --- define property. use this if the property is undefined");
     println("");
+    println("    -Dproperty=*");
+    println("                --- define property as latest version (in bash, this will be -Dproperty=\\*)");
+    println("");
     println("    -d [directory]");
     println("                --- set file output directory");
     println("");

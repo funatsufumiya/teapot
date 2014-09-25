@@ -59,6 +59,9 @@ option:
     -Dproperty=value
                 --- define property. use this if the property is undefined
 
+    -Dproperty=*
+                --- define property as latest version (in bash, this will be -Dproperty=\*)
+
     -d [directory]
                 --- set file output directory
 
