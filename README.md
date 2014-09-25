@@ -13,16 +13,11 @@ Java Library Installer *using Maven Central* (like rubygems)
 
 #### Latest
 
-- [teapot-0.10.2b.jar](http://atmarksharp.github.io/jarget/teapot-0.10.2b.jar)
+- [teapot-0.10.3b.jar](http://atmarksharp.github.io/jarget/teapot-0.10.3b.jar)
 
 #### Archives
 
-- [jarget-0.10.1b.jar](http://atmarksharp.github.io/jarget/jarget-0.10.1b.jar)
-- [jarget-0.9.22b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.22b.jar)
-- [jarget-0.9.18b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.18b.jar)
-- [jarget-0.9.16b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.16b.jar)
-- [jarget-0.9.12b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.12b.jar)
-- [jarget-0.9.10b.jar](http://atmarksharp.github.io/jarget/jarget-0.9.10b.jar)
+- [teapot-0.10.2b.jar](http://atmarksharp.github.io/jarget/teapot-0.10.2b.jar)
 
 ## Usage
 
@@ -53,6 +48,12 @@ command:
                 --- download pom-file [version] of [group-id].[artifact]
 
 option:
+
+    -v | --version
+                --- print version
+
+    -h | --help
+                --- show help
 
     -Dproperty=value
                 --- define property. use this if the property is undefined

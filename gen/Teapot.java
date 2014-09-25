@@ -21,7 +21,7 @@ import net.arnx.jsonic.JSON;
 
 public class Teapot {
 
-  public static final String version = "___VERSION___";
+  public static final String version = "0.10.3b";
   public static final String RED = "\u001b[31m";
   public static final String RESET = "\u001b[m";
 

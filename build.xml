@@ -1,9 +1,10 @@
 <project name="ivy-sample" default="run" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
   <property name="lib" value="lib" />
   <property name="local" value="local" />
+  <property name="gen" value="gen" />
   <property name="main-class" value="Teapot" />
   <property name="jar-name" value="teapot" />
-  <property name="version" value="0.10.2b" />
+  <property name="version" value="0.10.3b" />
 
   <path id="lib.path.id">
     <fileset dir="${lib}"/>
@@ -14,9 +15,31 @@
     <ivy:retrieve pattern="${lib}/[artifact].[ext]"/>
   </target>
 
+  <target name="insert-version">
+    <taskdef name="groovy"
+         classname="org.codehaus.groovy.ant.Groovy"
+         classpathref="lib.path.id"/>
+    <delete dir="${gen}"/>
+    <mkdir dir="${gen}"/>
+    <groovy>
+      <arg value="${main-class}.java"/>
+      <arg value="${gen}"/>
+      <arg value="${version}"/>
+      <![CDATA[
+      String filename = args[0]
+      String outDir = args[1]
+      String version = args[2]
+      String content = new File(filename).text
+      String newContent = content.replaceAll("___VERSION___",version)
+      new File(outDir + "/" + filename).withWriter{ it << newContent }
+      println("wrote: " + outDir + "/" + filename)
+      ]]>
+    </groovy>
+  </target>
+
   <!-- compile -->
-  <target name="compile" depends="resolve">
-    <javac classpath="${local}/jsonic.jar:${lib}/commons-io.jar" srcdir="${basedir}" includes="${main-class}.java" destdir="${basedir}" source="1.6" target="1.6" debug="true"/>
+  <target name="compile" depends="resolve,insert-version">
+    <javac classpath="${local}/jsonic.jar:${lib}/commons-io.jar" srcdir="${gen}" destdir="${basedir}" includes="${main-class}.java" source="1.6" target="1.6" debug="true"/>
   </target>
 
   <!-- jar -->
