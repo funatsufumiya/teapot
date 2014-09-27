@@ -4,7 +4,7 @@
   <property name="gen" value="gen" />
   <property name="main-class" value="Teapot" />
   <property name="jar-name" value="teapot" />
-  <property name="version" value="0.11.10b" />
+  <property name="version" value="0.12.0b" />
 
   <path id="lib.path.id">
     <fileset dir="${lib}"/>

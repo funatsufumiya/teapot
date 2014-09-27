@@ -22,7 +22,7 @@ import net.arnx.jsonic.JSON;
 
 public class Teapot {
 
-  public static final String version = "0.11.10b";
+  public static final String version = "0.12.0b";
   public static final String RED = "\u001b[31m";
   public static final String RESET = "\u001b[m";
 
@@ -166,8 +166,11 @@ public class Teapot {
     return s;
   }
 
-  public static Document pom(String groupId, String artifact, String version){
+  public static Document pom(String groupId, String artifact, String version) throws Exception {
     String s = downloadFileAsString(groupId, artifact, version, "pom");
+    if(s.startsWith("<html>")){
+      throw new RuntimeException();
+    }
     if(s != null){
       return toXML(s);
     }else{
@@ -382,7 +385,16 @@ public class Teapot {
 
     if(root) println("[Phase 1/4] Downloading Pom...");
 
-    Document xml = pom(groupId, artifact, version);
+    Document xml = null;
+    try{
+      xml = pom(groupId, artifact, version);
+    }catch(Exception e){
+      if(root) println("[Phase 4/4] Downloading Jar file...");
+      byte[] jarBytes = downloadFileAsBytes(groupId, artifact, version, "jar");
+      writeFile(jarBytes, directory, artifact, version, "jar");
+      if(root) println("Complete!");
+      return;
+    }
 
     if(xml == null){
       println(String.format(RED + "[Error] %s:%s (%s) was not found" + RESET, groupId, artifact, version));
