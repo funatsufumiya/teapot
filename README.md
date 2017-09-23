@@ -13,10 +13,11 @@ Java Library Installer *using Maven Central* (like rubygems)
 
 #### Latest
 
-- [teapot-0.11.10b.jar](http://atmarksharp.github.io/jarget/teapot-0.11.10b.jar)
+- [teapot-0.12.0b.jar](https://github.com/atmarksharp/teapot/releases/download/0.12.0b/teapot-0.12.0b.jar)
 
 #### Archives
 
+- [teapot-0.11.10b.jar](http://atmarksharp.github.io/jarget/teapot-0.11.10b.jar)
 - [teapot-0.10.3b.jar](http://atmarksharp.github.io/jarget/teapot-0.10.3b.jar)
 - [teapot-0.10.2b.jar](http://atmarksharp.github.io/jarget/teapot-0.10.2b.jar)
 
